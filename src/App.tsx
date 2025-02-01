@@ -17,6 +17,16 @@ Task categories/tags for better organization
  - Swipe gestures for quick actions (mark complete, delete)
  */
 
+ /**
+    color palette: https://www.color-hex.com/color-palette/42995
+ */
+
+ import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 export default function App() {
-  return <AppNavigator />;
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <AppNavigator/>
+      </GestureHandlerRootView>
+    )
 }

@@ -1,15 +1,10 @@
-import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import {TodoList} from './TodoList'
-import { View } from 'react-native'
+import React from 'react';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {TodoList} from './TodoList';
+import {ScreenProps} from '../../navigation/RootNavigator';
 
+const Todo = ({navigation}: ScreenProps) => {
+  return <TodoList navigation={navigation} />;
+};
 
-const Todo = () => {
-  return (
-    <View>
-      <TodoList />
-    </View>
-  )
-}
-
-export default Todo 
+export default Todo;

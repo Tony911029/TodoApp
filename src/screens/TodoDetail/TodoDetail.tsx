@@ -1,38 +1,64 @@
-import React, { useState } from 'react';
+import React, {useMemo, useState} from 'react';
 import {FlatList, Text, View, StyleSheet, TouchableOpacity} from 'react-native';
-import {ScreenProps} from '../../navigation/RootNavigator';
-import {ToDo} from '../../interface/TodoInterface';
+import {RootStackParamList, ScreenProps} from '../../navigation/RootNavigator';
+import {Priority, Task, ToDo} from '../../interface/TodoInterface';
 import {useTodoList} from '../../hooks/useList';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { CustomDialog } from '../../components/Dialog/CustomDialog';
+import {CustomDialog} from '../../components/Dialog/CustomDialog';
+import {RouteProp} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
+// Here we will list a list of tasks user need to complete
+// 1. A checkbox
+// 2. A task title
+// 3. Cofirmation dialog: Priority, Due date, Description, title
+// 4. A delete button
+// 5. An edit button
+// 6. Priority indicator
+// 7. Refactoring the list. We can combine this with the todo list screen
+type TodoDetailProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'TodoDetail'>;
+  route: RouteProp<RootStackParamList, 'TodoDetail'>;
+};
 
-// TODO: Implement the TODO detail screen
-// TODO: Implement Edit functionality
-// TODO: Add reordering functionality
-// TODO: Use trash and edit icons
-
-export const TodoList = ({navigation}: ScreenProps) => {
-  const {currentList, addTodo, updateTodo, deleteTodo} = useTodoList();
+const TodoDetail = ({navigation, route}: TodoDetailProps) => {
+  const {currentList, addTasks, updateTodo, getTodo, deleteTodo} = useTodoList();
   const [confirm, setConfirm] = useState(false);
-  
-  const navagiateListDetail = (todo: ToDo) => {
-    // Get the ToDo then pass it to the component probably or as a route param
-    navigation.navigate('TodoDetail', { todoId: todo.id });
+
+  const currentToDo: ToDo | undefined = useMemo(
+    () => currentList.find(todo => todo.id === route.params.todoId),
+    [currentList],
+  );
+
+  if (!currentToDo) {
+    return <Text>Todo not found</Text>;
+  } 
+
+  const addTask = () => {
+    const title = 'New task';
+    const id = '123';
+    const newTask: Task = {
+      id,
+      title,
+      description: '',
+      isCompleted: false,
+      priority: Priority.LOW,
+    };
+    currentToDo?.tasks?.push(newTask);
+    updateTodo(currentToDo);
   };
 
-  const handleAddTodo = (title : string) => {
-    addTodo(title); // intentionally not awaiting
+  const handleAddTask = (title : string) => {
+    addTasks(title, currentToDo); // intentionally not awaiting
     setConfirm(false);
   };
 
-  const onEdit = (item: ToDo) => {
-    updateTodo(item);
-  };
 
-  const onDelete = (item: ToDo) => {
-    deleteTodo(item.id);
-  };
+  console.log('todo', currentToDo);
+
+  const onEdit = (item: ToDo) => {};
+
+  const onDelete = (item: ToDo) => {};
 
   const renderRightActions = (progress, dragX, item: ToDo) => {
     return (
@@ -58,11 +84,13 @@ export const TodoList = ({navigation}: ScreenProps) => {
   return (
     <View>
       <View style={styles.container}>
-        <Text style={styles.header}>Todo List</Text>
+        <Text style={styles.header}>{currentToDo.title}</Text>
         <FlatList
-          data={currentList}
+          data={currentToDo?.tasks}
           keyExtractor={item => item?.id?.toString()}
+          // TODO: We can factor our everything else and create a component for render Item
           renderItem={({item}) => (
+            // Add a checkbox here (task.isCompleted)
             <Swipeable
               renderRightActions={(progress, dragX) =>
                 renderRightActions(progress, dragX, item)
@@ -70,7 +98,7 @@ export const TodoList = ({navigation}: ScreenProps) => {
               <TouchableOpacity
                 style={styles.item}
                 onPress={() => {
-                  navagiateListDetail(item);
+                  // navagiateListDetail(item);
                 }}
                 activeOpacity={0.7}>
                 <Text style={styles.itemText}>{item?.title}</Text>
@@ -80,26 +108,26 @@ export const TodoList = ({navigation}: ScreenProps) => {
         />
         <TouchableOpacity
           style={styles.fab}
-          onPress={() => setConfirm(true)}
+          onPress={() => addTask()}
           activeOpacity={0.9}>
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
       </View>
-      
       <CustomDialog
         visible={confirm}
-        handleCancel = {() => setConfirm(false)}
-        handleConfirm = {handleAddTodo}
-        cancelText = 'Cancel'
-        actionText = 'Confirm'
-        title = 'New Todo'
-        showInput = {true}
-        description = 'Add a new title for your new todo list'
-        inputPlaceholder = 'Enter a title here...'
+        handleCancel={() => setConfirm(false)}
+        handleConfirm={handleAddTask}
+        cancelText="Cancel"
+        actionText="Confirm"
+        title="New Task"
+        showInput={true}
+        description="Add a new title for your new task"
+        inputPlaceholder="Enter a title here..."
       />
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -167,3 +195,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffcc00',
   },
 });
+
+export default TodoDetail;

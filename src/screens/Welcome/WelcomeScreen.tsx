@@ -1,7 +1,7 @@
 import {View, Text, Button, StyleSheet} from 'react-native';
 import React from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/RootNavigator';
+import { ScreenProps } from '../../navigation/RootNavigator';
 
 const styles = StyleSheet.create({
   container: {
@@ -20,12 +20,8 @@ const styles = StyleSheet.create({
   },
 });
 
-interface WelcomeScreenProps {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
-};
 
-
-const WelcomeScreen = ({navigation}: WelcomeScreenProps) => {
+const WelcomeScreen = ({navigation}: ScreenProps) => {
 
   const handleContinue = () => {
     navigation.navigate('Todo');
